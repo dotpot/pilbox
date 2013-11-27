@@ -12,7 +12,7 @@ from tornado.test.util import unittest
 from pilbox.errors import (AngleError, BackgroundError,
                            DimensionsError, FilterError,
                            FormatError, ImageFormatError,
-                           ModeError, PositionError, QualityError)
+                           ModeError, PositionError, QualityError, CropError)
 from pilbox.image import color_hex_to_dec_tuple, Image
 
 try:
@@ -61,7 +61,7 @@ class ImageTest(unittest.TestCase):
             self._assert_expected_resize(case)
 
     def test_rotate(self):
-        with open(os.path.join(DATADIR, "test_rotation.jpg") ,"rb") as rotation_image:
+        with open(os.path.join(DATADIR, "test_rotation.jpg"), "rb") as rotation_image:
             image = PIL.Image.open(rotation_image)
             original_size = image.size
             rotation_image.seek(0)
@@ -72,7 +72,7 @@ class ImageTest(unittest.TestCase):
             self.assertNotEqual(original_size, new_size)
 
     def test_operation_manipulates_internal_stream(self):
-        with open(os.path.join(DATADIR, "test_rotation.jpg") ,"rb") as rotation_image:
+        with open(os.path.join(DATADIR, "test_rotation.jpg"), "rb") as rotation_image:
             rotation_image.seek(0)
             img = Image(rotation_image)
             original_stream = img.stream
@@ -108,6 +108,42 @@ class ImageTest(unittest.TestCase):
         invalid_angles = [None, "a", ""]
         for inv_angle in invalid_angles:
             self.assertRaises(AngleError, Image.validate_angle, inv_angle)
+
+    def test_valid_crop(self):
+        valid_crops = [
+            (10, 10, 50, 50, 50, 50),
+            (10, 10, 50, 50, 100, 100),
+            (0, 0, 50, 50, 100, 100),
+            (0, 0, 50, 50, 50, 50),
+        ]
+
+        for crop in valid_crops:
+            Image.validate_crop(*crop)
+
+    def test_invalid_crop(self):
+        invalid_crops = [
+            (None, None, None, None, 100, 100),
+            (10, None, None, None, 100, 100),
+            (None, 10, None, None, 100, 100),
+            (None, None, 10, None, 100, 100),
+            (None, None, None, 10, 100, 100),
+            (None, 10, 10, 10, 100, 100),
+            (10, None, 10, 10, 100, 100),
+            (10, 10, None, 10, 100, 100),
+            (10, 10, 10, None, 100, 100),
+            (-1, 10, 10, 10, 100, 100),
+            (10, 10, 101, 101, 100, 100),
+            (101, 101, 10, 10, 100, 100),
+        ]
+        for crop in invalid_crops:
+            self.assertRaises(CropError, Image.validate_crop, *crop)
+
+        try:
+            Image.validate_crop(1, 1, 100, 100, 50, 50)
+            self.fail("CropError should be raised.")
+        except CropError as e:
+            self.assertIsNotNone(e.log_message)
+            self.assertIn("Crop coordinates are out of bounds", e.log_message)
 
     def test_valid_dimensions(self):
         Image.validate_dimensions(100, 100)

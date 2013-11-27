@@ -24,10 +24,10 @@ import PIL.Image
 import PIL.ImageOps
 import tornado.httpclient
 
-from pilbox.errors import (AngleError, BackgroundError,
-                           DimensionsError, FilterError,
-                           FormatError, ImageFormatError,
-                           ModeError, PositionError, QualityError)
+from pilbox.errors import (AngleError, BackgroundError, CropError,
+                           DimensionsError, FilterError, FormatError,
+                           ImageFormatError, ModeError, PositionError,
+                           QualityError)
 
 try:
     from io import BytesIO
@@ -98,6 +98,31 @@ class Image(object):
             raise AngleError("Invalid angle: %s" % angle)
 
     @staticmethod
+    def validate_crop(x1, y1, x2, y2, img_w, img_h):
+        if x1 is None or y1 is None or x2 is None or y2 is None:
+            raise CropError("Missing crop coordinates")
+        elif x1 and not str(x1).isdigit():
+            raise CropError("Invalid x1: %s" % x1)
+        elif y1 and not str(y1).isdigit():
+            raise CropError("Invalid y1: %s" % y1)
+        elif x2 and not str(x2).isdigit():
+            raise CropError("Invalid x2: %s" % x2)
+        elif y2 and not str(y2).isdigit():
+            raise CropError("Invalid y2: %s" % y2)
+        elif (x1 < 0 or x2 < 0 or
+              x1 > img_w or x2 > img_w or
+              y1 < 0 or y2 < 0 or
+              y1 > img_h or y2 > img_h):
+            raise CropError("Crop coordinates are "
+                            "out of bounds, given: "
+                            "x1: {x1}, y1: {y1}, "
+                            "x2: {x2}, y2: {y2}. "
+                            "Image dimensions is: "
+                            "w: {w}, h: {h}".format(x1=x1, y1=y1,
+                                                    x2=x2, y2=y2,
+                                                    w=img_w, h=img_h))
+
+    @staticmethod
     def validate_options(opts):
         opts = Image._normalize_options(opts)
         if opts["mode"] not in Image.MODES:
@@ -163,6 +188,46 @@ class Image(object):
         self._set_stream(outfile)
 
         return outfile
+
+    def crop_by_full_coordinates(self, x1, y1, x2, y2, **kwargs):
+        """ Returns a buffer to the cropped image by
+            full coordinates x1, y1, x2, y2, for saving.
+
+        Supports the following optional keyword arguments:
+
+        quality - The quality used to save JPEGs: integer from 1 - 100
+        """
+        img = PIL.Image.open(self.stream)
+        if img.format.lower() not in self.FORMATS:
+            raise ImageFormatError("Unknown format: %s" % img.format)
+
+        width, height = img.size
+        Image.validate_crop(x1, y1, x2, y2, width, height)
+        opts = Image._normalize_options(kwargs, self.defaults)
+
+        cropped = img.crop((x1, y1, x2, y2))
+
+        outfile = BytesIO()
+        cropped.save(outfile, img.format, quality=int(opts["quality"]))
+        outfile.seek(0)
+
+        self._set_stream(outfile)
+
+        return outfile
+
+    def crop_by_starting_point_and_dimensions(self, x1, y1,
+                                              width, height, **kwargs):
+        """ Returns a buffer to cropped image by
+            starting coordinates x1, y1 and dimensions
+            width and height, for saving.
+
+        Supports the following optional keyword arguments:
+
+        quality - The quality used to save JPEGs: integer from 1 - 100
+        """
+        return self.crop_by_full_coordinates(x1, y1,
+                                             x1 + width, y1 + height,
+                                             kwargs)
 
     def _set_stream(self, new_stream):
         """ Modifies internal stream

@@ -4,20 +4,22 @@ from __future__ import (absolute_import, division, print_function,
 from tornado.test.util import unittest
 
 from pilbox.errors import (AngleError, ArgumentsError, BackgroundError,
-                           ClientError, DimensionsError, FetchError,
-                           FilterError, FormatError, HostError,
-                           ImageFormatError, ModeError, PilboxError,
-                           PositionError, QualityError, SignatureError,
-                           UrlError)
+                           ClientError, CropError,
+                           DimensionsError, FetchError, FilterError,
+                           FormatError, HostError, ImageFormatError,
+                           ModeError, PilboxError, PositionError,
+                           QualityError, SignatureError, UrlError)
 
 
 class ErrorsTest(unittest.TestCase):
 
     def test_unique_error_codes(self):
-        errors = [SignatureError, ClientError, HostError, BackgroundError,
-                  DimensionsError, FilterError, FormatError, ModeError,
-                  PositionError, QualityError, UrlError, ImageFormatError,
-                  FetchError, AngleError, ArgumentsError]
+        errors = [AngleError, ArgumentsError, BackgroundError,
+                  ClientError, CropError, DimensionsError,
+                  FetchError, FilterError, FormatError, HostError,
+                  ImageFormatError, ModeError, PilboxError,
+                  PositionError, QualityError, SignatureError,
+                  UrlError]
         codes = []
         for error in errors:
             code = str(error.get_code())
