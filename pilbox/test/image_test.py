@@ -81,6 +81,26 @@ class ImageTest(unittest.TestCase):
             img.stream.seek(0)
             self.assertNotEqual(original_stream.read(), img.stream.read())
 
+    def test_crop_by_full_coordinates(self):
+        with open(os.path.join(DATADIR, "test_rotation.jpg"), "rb") as rotation_image:
+            rotation_image.seek(0)
+            img = Image(rotation_image)
+            cropped = PIL.Image.open(img.crop_by_full_coordinates(10, 10, 30, 30))
+            self.assertEqual((20, 20), cropped.size)
+
+    def test_crop_by_starting_and_w_and_h(self):
+        with open(os.path.join(DATADIR, "test_rotation.jpg"), "rb") as rotation_image:
+            rotation_image.seek(0)
+            img = Image(rotation_image)
+            cropped = PIL.Image.open(img.crop_by_starting_point_and_dimensions(10, 10, 20, 20))
+            self.assertEqual((20, 20), cropped.size)
+
+        with open(os.path.join(DATADIR, "test_rotation.jpg"), "rb") as rotation_image:
+            rotation_image.seek(0)
+            img = Image(rotation_image)
+            cropped = PIL.Image.open(img.crop_by_starting_point_and_dimensions(10, 10, 30, 20))
+            self.assertEqual((30, 20), cropped.size)
+
     def test_resize_using_settings(self):
         for case in get_image_resize_cases():
             if case.get("mode") == "crop" and case.get("position") == "face":

@@ -227,7 +227,7 @@ class Image(object):
         """
         return self.crop_by_full_coordinates(x1, y1,
                                              x1 + width, y1 + height,
-                                             kwargs)
+                                             **kwargs)
 
     def _set_stream(self, new_stream):
         """ Modifies internal stream
