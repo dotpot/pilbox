@@ -153,6 +153,15 @@ class ImageHandler(tornado.web.RequestHandler):
 
         output = BytesIO()
         resize, rotate = self.get_argument("w") or self.get_argument("h"), self.get_argument("rotate")
+        full_crop = (self.get_argument("x1") and
+                     self.get_argument("y1") and
+                     self.get_argument("x2") and
+                     self.get_argument("y2"))
+
+        part_crop = (self.get_argument("x1") and
+                     self.get_argument("y1") and
+                     self.get_argument("h") and
+                     self.get_argument("w"))
 
         if resize:
             opts = self._get_resize_options()
