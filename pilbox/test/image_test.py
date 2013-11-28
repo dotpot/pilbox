@@ -224,6 +224,14 @@ class ImageTest(unittest.TestCase):
         self.assertRaises(
             PositionError, Image.validate_options, dict(position="foo"))
 
+    def test_bad_position_ratio(self):
+        self.assertRaises(
+            PositionError, Image.validate_options, dict(position="1.2,5.6"))
+
+    def test_valid_position_ratio(self):
+        for pos in ["0.0,0.5", "1.0,1.0", "0.111111,0.999999"]:
+            Image.validate_options(dict(position=pos))
+
     def test_bad_quality_invalid_number(self):
         self.assertRaises(
             QualityError, Image.validate_options, dict(quality="foo"))
@@ -290,6 +298,8 @@ def _get_advanced_criteria_combinations():
         [dict(values=[["fill"], [(125, 75)], ["F00", "cccccc"]],
               fields=["mode", "size", "background"]),
          dict(values=[["crop"], [(125, 75)], Image.POSITIONS],
+              fields=["mode", "size", "position"]),
+         dict(values=[["crop"], [(125, 75)], ["0.25,0.75", "0.25,0.25"]],
               fields=["mode", "size", "position"]),
          dict(values=[["crop"], [(125, 75)], Image.FILTERS],
               fields=["mode", "size", "filter"]),

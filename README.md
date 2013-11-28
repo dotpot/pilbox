@@ -118,6 +118,7 @@ This will request the image served at the supplied url and resize it to `300x300
     * _bottom_: Crop from the bottom center
     * _bottom-right_: Crop from the bottom right
     * _face_: Identify faces and crop from the midpoint of their position(s)
+    * _x,y_: Custom position ratio, e.g. 0.0,0.75
   * _q_: The quality (1-100) used to save the image, only relevant to JPEGs.
   * _client_: The client name
   * _sig_: The signature
@@ -132,7 +133,7 @@ The following images show the various resizing modes in action for an original i
 Clip
 ----
 
-The image is resized to fit within a `500x400` box, maintaing aspect ratio and producing an image that is `500x334`. Clipping is useful when no portion of the image can be lost and it is acceptable that the image not be exactly the supplied dimensions, but merely fit within the dimensions.
+The image is resized to fit within a `500x400` box, maintaining aspect ratio and producing an image that is `500x334`. Clipping is useful when no portion of the image can be lost and it is acceptable that the image not be exactly the supplied dimensions, but merely fit within the dimensions.
 
 ![Clipped image](pilbox/test/data/expected/example-500x400-clip.jpg)
 
@@ -183,7 +184,7 @@ def derive_signature(key, qs):
     return m.hexdigest()
 ```
 
-The signature is passed to the application by appending the `sig` paramater to the query string; e.g. `x=1&y=2&z=3&sig=c9516346abf62876b6345817dba2f9a0c797ef26`. Note, the application does not include the leading question mark when verifying the supplied signature. To verify your signature implementation, see the `pilbox.signature` command described in the [tools section](#tools).
+The signature is passed to the application by appending the `sig` parameter to the query string; e.g. `x=1&y=2&z=3&sig=c9516346abf62876b6345817dba2f9a0c797ef26`. Note, the application does not include the leading question mark when verifying the supplied signature. To verify your signature implementation, see the `pilbox.signature` command described in the [tools section](#tools).
 
 Configuration
 =============
@@ -268,6 +269,7 @@ Changelog
   * 0.8.3: Only allow http and https protocols
   * 0.8.4: Added support for WebP
   * 0.8.5: Added format option and configuration overrides for mode and format
+  * 0.8.6: Added custom position support
 
 Docker
 ======

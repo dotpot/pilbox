@@ -22,7 +22,8 @@ import tornado.web
 
 class PilboxError(tornado.web.HTTPError):
     @staticmethod
-    def get_code(): raise NotImplementedError()
+    def get_code():
+        raise NotImplementedError()
 
 
 class BadRequestError(PilboxError):
@@ -32,42 +33,50 @@ class BadRequestError(PilboxError):
 
 class BackgroundError(BadRequestError):
     @staticmethod
-    def get_code(): return 1
+    def get_code():
+        return 1
 
 
 class DimensionsError(BadRequestError):
     @staticmethod
-    def get_code(): return 2
+    def get_code():
+        return 2
 
 
 class FilterError(BadRequestError):
     @staticmethod
-    def get_code(): return 3
+    def get_code():
+        return 3
 
 
 class FormatError(BadRequestError):
     @staticmethod
-    def get_code(): return 4
+    def get_code():
+        return 4
 
 
 class ModeError(BadRequestError):
     @staticmethod
-    def get_code(): return 5
+    def get_code():
+        return 5
 
 
 class PositionError(BadRequestError):
     @staticmethod
-    def get_code(): return 6
+    def get_code():
+        return 6
 
 
 class QualityError(BadRequestError):
     @staticmethod
-    def get_code(): return 7
+    def get_code():
+        return 7
 
 
 class UrlError(BadRequestError):
     @staticmethod
-    def get_code(): return 8
+    def get_code():
+        return 8
 
 
 class AngleError(BadRequestError):
@@ -90,7 +99,8 @@ class FetchError(PilboxError):
         super(FetchError, self).__init__(404, msg, *args, **kwargs)
 
     @staticmethod
-    def get_code(): return 301
+    def get_code():
+        return 301
 
 
 class ForbiddenError(PilboxError):
@@ -100,17 +110,20 @@ class ForbiddenError(PilboxError):
 
 class SignatureError(ForbiddenError):
     @staticmethod
-    def get_code(): return 101
+    def get_code():
+        return 101
 
 
 class ClientError(ForbiddenError):
     @staticmethod
-    def get_code(): return 102
+    def get_code():
+        return 102
 
 
 class HostError(ForbiddenError):
     @staticmethod
-    def get_code(): return 103
+    def get_code():
+        return 103
 
 
 class UnsupportedError(PilboxError):
@@ -120,4 +133,5 @@ class UnsupportedError(PilboxError):
 
 class ImageFormatError(UnsupportedError):
     @staticmethod
-    def get_code(): return 201
+    def get_code():
+        return 201
