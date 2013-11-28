@@ -110,10 +110,10 @@ class Image(object):
             raise CropError("Invalid x2: %s" % x2)
         elif y2 and not str(y2).isdigit():
             raise CropError("Invalid y2: %s" % y2)
-        elif (x1 < 0 or x2 < 0 or
-              x1 > img_w or x2 > img_w or
-              y1 < 0 or y2 < 0 or
-              y1 > img_h or y2 > img_h):
+        elif (int(x1) < 0 or int(x2) < 0 or
+              int(x1) > img_w or int(x2) > img_w or
+              int(y1) < 0 or int(y2) < 0 or
+              int(y1) > img_h or int(y2) > img_h):
             raise CropError("Crop coordinates are "
                             "out of bounds, given: "
                             "x1: {x1}, y1: {y1}, "
@@ -215,8 +215,8 @@ class Image(object):
         width, height = img.size
         Image.validate_crop(x1, y1, x2, y2, width, height)
         opts = Image._normalize_options(kwargs, self.defaults)
-
-        cropped = img.crop((x1, y1, x2, y2))
+        x1, y1, x2, y2 = map(int, [x1, y1, x2, y2])
+        cropped = img.crop((x1, y1, x1 + x2, y1 + y2))
 
         outfile = BytesIO()
         cropped.save(outfile, img.format, quality=int(opts["quality"]))
@@ -237,7 +237,7 @@ class Image(object):
         quality - The quality used to save JPEGs: integer from 1 - 100
         """
         return self.crop_by_full_coordinates(x1, y1,
-                                             x1 + width, y1 + height,
+                                             width, height,
                                              **kwargs)
 
     def _set_stream(self, new_stream):

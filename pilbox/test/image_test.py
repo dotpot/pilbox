@@ -86,7 +86,7 @@ class ImageTest(unittest.TestCase):
             rotation_image.seek(0)
             img = Image(rotation_image)
             cropped = PIL.Image.open(img.crop_by_full_coordinates(10, 10, 30, 30))
-            self.assertEqual((20, 20), cropped.size)
+            self.assertEqual((30, 30), cropped.size)
 
     def test_crop_by_starting_and_w_and_h(self):
         with open(os.path.join(DATADIR, "test_rotation.jpg"), "rb") as rotation_image:

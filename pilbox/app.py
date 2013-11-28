@@ -150,6 +150,7 @@ class ImageHandler(tornado.web.RequestHandler):
         if `rotate` is provided, it will happen after all other args.
         """
         image = Image(response.buffer, self.settings)
+        opts = self._get_resize_options()
 
         output = BytesIO()
         resize, rotate = self.get_argument("w") or self.get_argument("h"), self.get_argument("rotate")
@@ -163,8 +164,22 @@ class ImageHandler(tornado.web.RequestHandler):
                      self.get_argument("h") and
                      self.get_argument("w"))
 
-        if resize:
-            opts = self._get_resize_options()
+
+        if full_crop:
+            cropped = image.crop_by_full_coordinates(
+                *map(self.get_argument, ["x1", "y1", "x2", "y2"]), **opts)
+            output.write(cropped.read())
+            output.seek(0)
+            cropped.close()
+
+        if part_crop:
+            cropped = image.crop_by_starting_point_and_dimensions(
+                *map(self.get_argument, ["x1", "y1", "w", "h"]), **opts)
+            output.write(cropped.read())
+            output.seek(0)
+            cropped.close()
+
+        if resize and not part_crop:
             resized = image.resize(self.get_argument("w"), self.get_argument("h"), **opts)
             output.write(resized.read())
             output.seek(0)
@@ -222,10 +237,11 @@ class ImageHandler(tornado.web.RequestHandler):
 
     def _validate_transform_arguments(self):
         """ checks if at least one transformation argument is provided. """
-        if not [x for x in ["w", "h", "rotate"] if self.get_argument(x)]:
+        if not [x for x in ["w", "h", "rotate", "x1", "y1", "x2", "y2"] if self.get_argument(x)]:
             raise errors.ArgumentsError("Missing required arguments. "
                                         "Resize: require `w` or/and `h`."
-                                        "Rotate: require `rotate`.")
+                                        "Rotate: require `rotate`."
+                                        "Crop: require `x1`, `y1` AND `x2`, `y2` OR `h` or `w`.")
 
 def main():
     tornado.options.parse_command_line()
